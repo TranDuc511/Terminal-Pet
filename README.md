@@ -5,17 +5,13 @@ A virtual pet caring game that runs entirely in your terminal — built with Rus
 Adopt a cat, keep it happy by feeding, petting, and playing with it, and watch your **Bond** grow over time. Neglect your cat and the bond will slowly fade. Your pet's state is automatically saved, and bond decays even while the app is closed — so check in regularly!
 
 ```
-  /\_____/\
- /  ◕   ◕  \
-( ==  ♥  == ) purrr~
- )         (
-(           )
- \         /
-  )~      (
- /|       |\
-(_|       |_)
-    |   |
-   (_) (_)  ♥
+      /\_/\
+     ( o.o )
+      > ^ <
+     /     \
+    /       \
+   /   | |   \
+  (___(|_|_)__)~
 ```
 
 ---
@@ -152,10 +148,13 @@ Press `Esc` without typing to use the default name **"Whiskers"**.
 │  🐱 Terminal Pet — "Whiskers"        Theme: 🔵   │  ← Title bar
 ├──────────────────────────────────────────────────┤
 │                                                  │
-│              /\_____/\                           │
-│             /  o   o  \                          │  ← Your cat (animated)
-│            ( ==  v  == )      Mood shown here    │
-│                  ...                             │
+│                    /\_/\                         │
+│                   ( o.o )                        │  ← Your cat (animated)
+│                    > ^ <      Mood shown here    │
+│                   /     \                        │
+│                  /       \                       │
+│                 /   | |   \                      │
+│                (___(|_|_)__)~                    │
 │                                                  │
 ├──────────────┬──────────────┬────────────────────┤
 │ ❤️  Bond  75% │ 🍖 Fullness 60%│ ✨ Joy  80%       │  ← Stat gauges
