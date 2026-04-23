@@ -1,0 +1,14 @@
+# .cargo/config.toml
+#
+# Project-level Cargo configuration.
+#
+# IMPORTANT: The GNU linker toolchain (dlltool) cannot handle paths with spaces.
+# The project folder "Terminal Pet" contains a space, so we redirect the build
+# output to a space-free path. This file makes that permanent so you never need
+# to set CARGO_TARGET_DIR manually.
+
+[build]
+target-dir = "C:\\Users\\ADMIN\\cargo-targets\\terminal-pet"
+
+# Use the GNU toolchain for this project (avoids needing Visual Studio MSVC linker).
+target = "x86_64-pc-windows-gnu"
