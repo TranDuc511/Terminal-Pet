@@ -343,6 +343,15 @@ cargo check
 
 ---
 
+## Changelog
+
+### Released (v0.1.1)
+- **Feature:** Added a Pet Selection Menu on first launch to choose between Cat, Dog (soon), and Turtle (soon).
+- **Feature:** Added `[M]` Menu keybinding to exit to the selection menu and create a new pet.
+- **Fix:** Fixed an issue on Windows where keys would double-type due to both key press and release events being registered.
+
+---
+
 ## License
 
 This project is open source. Feel free to modify it, add more pet types, or extend the game mechanics!
