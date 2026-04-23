@@ -8,10 +8,12 @@ use serde::{Deserialize, Serialize};
 
 // ─── Enums ────────────────────────────────────────────────────────────────
 
-/// Pet species. Only Cat for the prototype.
+/// Pet species.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Species {
     Cat,
+    Dog,
+    Turtle,
 }
 
 /// Current animation / behavior state of the pet.
@@ -126,12 +128,12 @@ pub struct Pet {
 }
 
 impl Pet {
-    /// Create a brand-new cat with default stats.
-    pub fn new(name: String) -> Self {
+    /// Create a brand-new pet with default stats.
+    pub fn new(name: String, species: Species) -> Self {
         let now = Utc::now();
         Self {
             name,
-            species: Species::Cat,
+            species,
             bond:       60.0,
             hunger:     20.0,
             happiness:  70.0,

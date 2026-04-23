@@ -9,7 +9,7 @@ use crossterm::event::{KeyCode, KeyModifiers};
 
 use crate::{
     event::{AppEvent, EventHandler},
-    pet::Pet,
+    pet::{Pet, Species},
     save,
     theme::ThemeColor,
     ui,
@@ -22,6 +22,8 @@ use std::io::Stdout;
 /// Which screen is currently active.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Screen {
+    /// First-launch pet selection.
+    PetSelection,
     /// First-launch pet naming input.
     Naming,
     /// Main game screen.
@@ -52,6 +54,12 @@ pub struct App {
     /// Text buffer for pet-naming overlay.
     pub name_input: String,
 
+    /// Currently selected pet species index in the selection menu.
+    pub selected_species: usize,
+
+    /// Temporary message to display on the selection screen.
+    pub selection_message: Option<String>,
+
     /// Set to `true` to break the game loop and quit.
     should_quit: bool,
 
@@ -76,12 +84,12 @@ impl App {
             }
             None => {
                 // First launch — placeholder pet until name is entered
-                let pet = Pet::new("...".to_string());
+                let pet = Pet::new("...".to_string(), Species::Cat);
                 (pet, ThemeColor::Blue, true)
             }
         };
 
-        let screen = if is_new { Screen::Naming } else { Screen::Home };
+        let screen = if is_new { Screen::PetSelection } else { Screen::Home };
 
         let mut app = App {
             pet,
@@ -90,6 +98,8 @@ impl App {
             anim_tick:     0,
             messages:      Vec::new(),
             name_input:    String::new(),
+            selected_species: 0,
+            selection_message: None,
             should_quit:   false,
             last_autosave: Instant::now(),
         };
@@ -156,7 +166,7 @@ impl App {
         self.anim_tick = self.anim_tick.wrapping_add(1);
 
         // Only run pet logic on the main screen
-        if self.screen != Screen::Naming {
+        if self.screen != Screen::Naming && self.screen != Screen::PetSelection {
             if let Some(msg) = self.pet.tick() {
                 self.push_message(msg);
             }
@@ -175,9 +185,51 @@ impl App {
 
     fn on_key(&mut self, code: KeyCode, modifiers: KeyModifiers) {
         match self.screen {
+            Screen::PetSelection => self.handle_selection_key(code),
             Screen::Naming => self.handle_naming_key(code),
             Screen::Home   => self.handle_home_key(code, modifiers),
             Screen::Help   => self.handle_help_key(code),
+        }
+    }
+
+    // ── Pet Selection screen ──────────────────────────────────────────────
+
+    fn handle_selection_key(&mut self, code: KeyCode) {
+        // Clear previous message
+        self.selection_message = None;
+
+        match code {
+            KeyCode::Up => {
+                if self.selected_species > 0 {
+                    self.selected_species -= 1;
+                } else {
+                    self.selected_species = 2; // Wrap to bottom
+                }
+            }
+            KeyCode::Down => {
+                if self.selected_species < 2 {
+                    self.selected_species += 1;
+                } else {
+                    self.selected_species = 0; // Wrap to top
+                }
+            }
+            KeyCode::Enter => {
+                if self.selected_species == 0 {
+                    // Cat is selected, proceed to naming
+                    self.screen = Screen::Naming;
+                } else {
+                    // Dog or Turtle
+                    self.selection_message = Some("Not available yet".to_string());
+                }
+            }
+            KeyCode::Char('q') | KeyCode::Char('Q') | KeyCode::Esc => {
+                if code == KeyCode::Esc && self.pet.name != "..." {
+                    self.screen = Screen::Home;
+                } else {
+                    self.should_quit = true;
+                }
+            }
+            _ => {}
         }
     }
 
@@ -193,7 +245,7 @@ impl App {
             }
             KeyCode::Enter if !self.name_input.trim().is_empty() => {
                 let name = self.name_input.trim().to_string();
-                self.pet = Pet::new(name.clone());
+                self.pet = Pet::new(name.clone(), Species::Cat);
                 self.screen = Screen::Home;
                 self.push_message(format!(
                     "🐱 {} has joined your home! Take good care of them~",
@@ -201,17 +253,21 @@ impl App {
                 ));
             }
             KeyCode::Esc => {
-                // Use default name if the user presses Esc without entering a name
-                if self.name_input.trim().is_empty() {
-                    self.name_input = "Whiskers".to_string();
+                if self.pet.name != "..." {
+                    self.screen = Screen::Home;
+                } else {
+                    // Use default name if the user presses Esc without entering a name
+                    if self.name_input.trim().is_empty() {
+                        self.name_input = "Whiskers".to_string();
+                    }
+                    let name = self.name_input.trim().to_string();
+                    self.pet = Pet::new(name.clone(), Species::Cat);
+                    self.screen = Screen::Home;
+                    self.push_message(format!(
+                        "🐱 {} has joined your home! Take good care of them~",
+                        name
+                    ));
                 }
-                let name = self.name_input.trim().to_string();
-                self.pet = Pet::new(name.clone());
-                self.screen = Screen::Home;
-                self.push_message(format!(
-                    "🐱 {} has joined your home! Take good care of them~",
-                    name
-                ));
             }
             _ => {}
         }
@@ -268,6 +324,13 @@ impl App {
             // Help overlay
             KeyCode::Char('h') | KeyCode::Char('H') => {
                 self.screen = Screen::Help;
+            }
+
+            // Menu (New Pet)
+            KeyCode::Char('m') | KeyCode::Char('M') => {
+                self.screen = Screen::PetSelection;
+                self.selected_species = 0;
+                self.name_input.clear();
             }
 
             _ => {}

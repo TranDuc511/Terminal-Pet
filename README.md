@@ -114,7 +114,9 @@ cargo build --release
 
 ### First Launch
 
-On your very first run, you will be prompted to **name your cat**. Type a name and press `Enter`. Your cat is now alive!
+On your very first run, you will be greeted with a **Pet Selection Menu**. You can choose your preferred companion (currently, only Cat is available, with Dog and Turtle coming soon!). Use `Up` and `Down` to select, and `Enter` to confirm.
+
+After selecting your pet, you will be prompted to **name it**. Type a name and press `Enter`. Your companion is now alive!
 
 ```
 ┌─ 🐾 New Pet ──────────────────────────────┐
@@ -135,12 +137,13 @@ Press `Esc` without typing to use the default name **"Whiskers"**.
 
 | Key | Action | Cooldown |
 |-----|--------|----------|
-| `F` | **Feed** your cat 🍖 | 10 seconds |
-| `P` | **Head-pat** your cat 🤚 | 5 seconds |
+| `F` | **Feed** your pet 🍖 | 10 seconds |
+| `P` | **Head-pat** your pet 🤚 | 5 seconds |
 | `Y` | **Play** with a toy 🧶 | 15 seconds |
 | `T` | **Cycle** to the next color theme 🎨 | — |
+| `M` | **Menu** exit to selection (New pet) 🐾| — |
 | `H` | **Toggle** the Help overlay | — |
-| `Q` or `Esc` | **Quit** and save | — |
+| `Q` | **Quit** and save | — |
 
 ### Understanding the UI
 
@@ -157,7 +160,7 @@ Press `Esc` without typing to use the default name **"Whiskers"**.
 ├──────────────┬──────────────┬────────────────────┤
 │ ❤️  Bond  75% │ 🍖 Fullness 60%│ ✨ Joy  80%       │  ← Stat gauges
 ├──────────────┴──────────────┴────────────────────┤
-│  [F] Feed │ [P] Pat │ [Y] Play │ [T] Theme │ [Q] │  ← Action bar
+│ [F] Feed │ [P] Pat │ [Y] Play │ [T] Theme │ [M] Menu │ [H] Help │ [Q] Quit │  ← Action bar
 ├──────────────────────────────────────────────────┤
 │  ▸ You gently patted Whiskers! Bond +5           │
 │  ▸ Whiskers purrs contentedly~                   │  ← Message log

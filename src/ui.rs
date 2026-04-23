@@ -29,6 +29,7 @@ pub fn draw(frame: &mut Frame, app: &App) {
 
     match app.screen {
         Screen::Home => draw_home(frame, app, &theme),
+        Screen::PetSelection => draw_pet_selection_overlay(frame, app, &theme),
         Screen::Naming => draw_naming_overlay(frame, app, &theme),
         Screen::Help   => {
             draw_home(frame, app, &theme);
@@ -218,6 +219,9 @@ fn draw_action_bar(frame: &mut Frame, app: &App, theme: &Theme, area: Rect) {
         Span::styled("[T] ", Style::default().fg(theme.accent).add_modifier(Modifier::BOLD)),
         Span::styled("Theme", dim),
         sep.clone(),
+        Span::styled("[M] ", Style::default().fg(theme.accent).add_modifier(Modifier::BOLD)),
+        Span::styled("Menu", dim),
+        sep.clone(),
         Span::styled("[H] ", Style::default().fg(theme.accent).add_modifier(Modifier::BOLD)),
         Span::styled("Help", dim),
         sep.clone(),
@@ -331,6 +335,87 @@ fn draw_naming_overlay(frame: &mut Frame, app: &App, theme: &Theme) {
     frame.render_widget(para, popup);
 }
 
+// ─── Pet Selection overlay ────────────────────────────────────────────────
+
+fn draw_pet_selection_overlay(frame: &mut Frame, app: &App, theme: &Theme) {
+    let area = frame.area();
+
+    // Dim background
+    frame.render_widget(Clear, area);
+
+    // Centre box 60% wide, ~15 tall
+    let popup = centered_rect(60, 15, area);
+
+    let mut lines = vec![
+        Line::from(""),
+        Line::from(Span::styled(
+            "  Welcome to Terminal Pet!  🐱",
+            Style::default()
+                .fg(theme.title)
+                .add_modifier(Modifier::BOLD),
+        )),
+        Line::from(""),
+        Line::from(Span::styled(
+            "  Select your pet species:",
+            Style::default().fg(theme.message),
+        )),
+        Line::from(""),
+    ];
+
+    let options = [
+        "Cat",
+        "Dog (Coming soon)",
+        "Turtle (Coming soon)",
+    ];
+
+    for (i, option) in options.iter().enumerate() {
+        if i == app.selected_species {
+            lines.push(Line::from(Span::styled(
+                format!("  > {}", option),
+                Style::default()
+                    .fg(theme.primary)
+                    .add_modifier(Modifier::BOLD),
+            )));
+        } else {
+            lines.push(Line::from(Span::styled(
+                format!("    {}", option),
+                Style::default().fg(theme.message),
+            )));
+        }
+    }
+
+    lines.push(Line::from(""));
+    lines.push(Line::from(Span::styled(
+        "  [Up/Down] Select   [Enter] Confirm",
+        Style::default().fg(theme.muted),
+    )));
+
+    if let Some(msg) = &app.selection_message {
+        lines.push(Line::from(""));
+        lines.push(Line::from(Span::styled(
+            format!("  {}", msg),
+            Style::default().fg(theme.accent).add_modifier(Modifier::BOLD),
+        )));
+    }
+
+    let para = Paragraph::new(Text::from(lines))
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Double)
+                .border_style(Style::default().fg(theme.border))
+                .title(Span::styled(
+                    " 🐾 New Pet ",
+                    Style::default()
+                        .fg(theme.accent)
+                        .add_modifier(Modifier::BOLD),
+                )),
+        );
+
+    frame.render_widget(Clear, popup);
+    frame.render_widget(para, popup);
+}
+
 // ─── Help overlay ─────────────────────────────────────────────────────────
 
 fn draw_help_overlay(frame: &mut Frame, theme: &Theme) {
@@ -360,6 +445,9 @@ fn draw_help_overlay(frame: &mut Frame, theme: &Theme) {
         ]),
         Line::from(vec![
             Span::styled("  [T]", key), Span::styled("  Cycle color theme", dim),
+        ]),
+        Line::from(vec![
+            Span::styled("  [M]", key), Span::styled("  Exit to menu (New Pet)", dim),
         ]),
         Line::from(vec![
             Span::styled("  [H]", key), Span::styled("  Toggle this help screen", dim),
