@@ -9,7 +9,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use crossterm::event::{self, Event as CrosstermEvent, KeyEvent, MouseEvent};
+use crossterm::event::{self, Event as CrosstermEvent, KeyEvent, KeyEventKind, MouseEvent};
 
 /// Events that the application can receive.
 #[derive(Debug, Clone)]
@@ -49,7 +49,9 @@ impl EventHandler {
                 if event::poll(timeout).unwrap_or(false) {
                     match event::read() {
                         Ok(CrosstermEvent::Key(key)) => {
-                            let _ = sender.send(AppEvent::Key(key));
+                            if key.kind == KeyEventKind::Press {
+                                let _ = sender.send(AppEvent::Key(key));
+                            }
                         }
                         Ok(CrosstermEvent::Mouse(mouse)) => {
                             let _ = sender.send(AppEvent::Mouse(mouse));
