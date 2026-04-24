@@ -30,6 +30,8 @@ pub enum Screen {
     Home,
     /// Help overlay rendered over Home.
     Help,
+    /// Load previously saved pets.
+    LoadSaved,
 }
 
 // ─── App struct ───────────────────────────────────────────────────────────
@@ -60,6 +62,12 @@ pub struct App {
     /// Temporary message to display on the selection screen.
     pub selection_message: Option<String>,
 
+    /// Available saves for the Load screen.
+    pub load_options: Vec<crate::save::SaveFile>,
+
+    /// Currently selected save index.
+    pub selected_load: usize,
+
     /// Set to `true` to break the game loop and quit.
     should_quit: bool,
 
@@ -73,7 +81,7 @@ impl App {
     /// Initialize app state. Loads save file if present, otherwise starts
     /// the naming screen for first-launch.
     pub fn new() -> Self {
-        let (pet, theme, is_new) = match save::load() {
+        let (pet, theme, is_new) = match save::load_latest() {
             Some(mut saved) => {
                 // Apply offline bond/hunger/happiness decay
                 let mins = save::minutes_since(saved.pet.last_interaction);
@@ -100,6 +108,8 @@ impl App {
             name_input:    String::new(),
             selected_species: 0,
             selection_message: None,
+            load_options:  Vec::new(),
+            selected_load: 0,
             should_quit:   false,
             last_autosave: Instant::now(),
         };
@@ -166,7 +176,7 @@ impl App {
         self.anim_tick = self.anim_tick.wrapping_add(1);
 
         // Only run pet logic on the main screen
-        if self.screen != Screen::Naming && self.screen != Screen::PetSelection {
+        if self.screen == Screen::Home || self.screen == Screen::Help {
             if let Some(msg) = self.pet.tick() {
                 self.push_message(msg);
             }
@@ -189,6 +199,7 @@ impl App {
             Screen::Naming => self.handle_naming_key(code),
             Screen::Home   => self.handle_home_key(code, modifiers),
             Screen::Help   => self.handle_help_key(code),
+            Screen::LoadSaved => self.handle_load_saved_key(code),
         }
     }
 
@@ -203,11 +214,11 @@ impl App {
                 if self.selected_species > 0 {
                     self.selected_species -= 1;
                 } else {
-                    self.selected_species = 2; // Wrap to bottom
+                    self.selected_species = 3; // Wrap to bottom
                 }
             }
             KeyCode::Down => {
-                if self.selected_species < 2 {
+                if self.selected_species < 3 {
                     self.selected_species += 1;
                 } else {
                     self.selected_species = 0; // Wrap to top
@@ -217,6 +228,13 @@ impl App {
                 if self.selected_species == 0 {
                     // Cat is selected, proceed to naming
                     self.screen = Screen::Naming;
+                } else if self.selected_species == 3 {
+                    // Load saved
+                    self.screen = Screen::LoadSaved;
+                    self.load_options = save::list_saves();
+                    // Sort descending by saved_at
+                    self.load_options.sort_by_key(|s| std::cmp::Reverse(s.saved_at));
+                    self.selected_load = 0;
                 } else {
                     // Dog or Turtle
                     self.selection_message = Some("Not available yet".to_string());
@@ -328,11 +346,68 @@ impl App {
 
             // Menu (New Pet)
             KeyCode::Char('m') | KeyCode::Char('M') => {
+                if self.pet.name != "..." {
+                    save::save(&self.pet, self.theme);
+                }
                 self.screen = Screen::PetSelection;
                 self.selected_species = 0;
                 self.name_input.clear();
             }
 
+            _ => {}
+        }
+    }
+
+    // ── Load Saved screen ─────────────────────────────────────────────────
+
+    fn handle_load_saved_key(&mut self, code: KeyCode) {
+        match code {
+            KeyCode::Up => {
+                if self.selected_load > 0 {
+                    self.selected_load -= 1;
+                } else if !self.load_options.is_empty() {
+                    self.selected_load = self.load_options.len() - 1;
+                }
+            }
+            KeyCode::Down => {
+                if !self.load_options.is_empty() {
+                    if self.selected_load < self.load_options.len() - 1 {
+                        self.selected_load += 1;
+                    } else {
+                        self.selected_load = 0;
+                    }
+                }
+            }
+            KeyCode::Enter => {
+                if !self.load_options.is_empty() && self.selected_load < self.load_options.len() {
+                    let mut saved = self.load_options.remove(self.selected_load);
+                    let mins = save::minutes_since(saved.pet.last_interaction);
+                    if mins > 0.5 {
+                        saved.pet.apply_offline_decay(mins);
+                    }
+                    self.pet = saved.pet;
+                    self.theme = saved.theme;
+                    self.screen = Screen::Home;
+                    self.push_message(format!(
+                        "Welcome back! {} is happy to see you~ 🐱",
+                        self.pet.name
+                    ));
+                }
+            }
+            KeyCode::Delete | KeyCode::Backspace => {
+                if !self.load_options.is_empty() && self.selected_load < self.load_options.len() {
+                    let saved = &self.load_options[self.selected_load];
+                    save::delete_save(&saved.pet.name);
+                    self.load_options.remove(self.selected_load);
+                    
+                    if self.selected_load >= self.load_options.len() && self.selected_load > 0 {
+                        self.selected_load -= 1;
+                    }
+                }
+            }
+            KeyCode::Char('q') | KeyCode::Char('Q') | KeyCode::Esc => {
+                self.screen = Screen::PetSelection;
+            }
             _ => {}
         }
     }

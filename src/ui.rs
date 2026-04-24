@@ -35,6 +35,7 @@ pub fn draw(frame: &mut Frame, app: &App) {
             draw_home(frame, app, &theme);
             draw_help_overlay(frame, &theme);
         }
+        Screen::LoadSaved => draw_load_saved_overlay(frame, app, &theme),
     }
 }
 
@@ -65,9 +66,11 @@ fn draw_home(frame: &mut Frame, app: &App, theme: &Theme) {
 // ── Title bar ──────────────────────────────────────────────────────────────
 
 fn draw_title_bar(frame: &mut Frame, app: &App, theme: &Theme, area: Rect) {
+    let days = (chrono::Utc::now() - app.pet.created_at).num_days() + 1;
     let title = format!(
-        " 🐱 Terminal Pet — \"{}\"   Theme: {} {} ",
+        " 🐱 Terminal Pet — \"{}\" (Day {})   Theme: {} {} ",
         app.pet.name,
+        days,
         theme.variant.icon(),
         theme.variant.name(),
     );
@@ -95,9 +98,15 @@ fn draw_pet_panel(frame: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     // Build styled text — every non-empty line gets the primary theme color
     let styled_lines: Vec<Line> = art
         .lines()
+        .filter(|line| !line.is_empty())
         .map(|line| {
+            let width = Span::raw(line).width();
+            let pad_len = 25_usize.saturating_sub(width);
+            // Prepend 6 spaces to shift the cat's core body towards the visual center of the 25-char block
+            let padded = format!("      {}{}", line, " ".repeat(pad_len));
+            
             Line::from(Span::styled(
-                line.to_string(),
+                padded,
                 Style::default()
                     .fg(theme.primary)
                     .add_modifier(Modifier::BOLD),
@@ -105,7 +114,19 @@ fn draw_pet_panel(frame: &mut Frame, app: &App, theme: &Theme, area: Rect) {
         })
         .collect();
 
-    let para = Paragraph::new(Text::from(styled_lines))
+    // Calculate dynamic vertical padding to center the art block
+    let inner_height = area.height.saturating_sub(2); // subtract borders
+    let art_height = styled_lines.len() as u16;
+    let top_padding = inner_height.saturating_sub(art_height) / 2;
+
+    let mut final_lines = Vec::new();
+    // Add empty lines for top padding
+    for _ in 0..top_padding {
+        final_lines.push(Line::from(""));
+    }
+    final_lines.extend(styled_lines);
+
+    let para = Paragraph::new(Text::from(final_lines))
         .alignment(Alignment::Center)
         .block(
             Block::default()
@@ -366,6 +387,7 @@ fn draw_pet_selection_overlay(frame: &mut Frame, app: &App, theme: &Theme) {
         "Cat",
         "Dog (Coming soon)",
         "Turtle (Coming soon)",
+        "Load saved",
     ];
 
     for (i, option) in options.iter().enumerate() {
@@ -406,6 +428,84 @@ fn draw_pet_selection_overlay(frame: &mut Frame, app: &App, theme: &Theme) {
                 .border_style(Style::default().fg(theme.border))
                 .title(Span::styled(
                     " 🐾 New Pet ",
+                    Style::default()
+                        .fg(theme.accent)
+                        .add_modifier(Modifier::BOLD),
+                )),
+        );
+
+    frame.render_widget(Clear, popup);
+    frame.render_widget(para, popup);
+}
+
+// ─── Load Saved overlay ───────────────────────────────────────────────────
+
+fn draw_load_saved_overlay(frame: &mut Frame, app: &App, theme: &Theme) {
+    let area = frame.area();
+
+    // Dim background
+    frame.render_widget(Clear, area);
+
+    // Centre box 60% wide, variable height
+    let popup_height = std::cmp::max(15, app.load_options.len() as u16 + 10);
+    let popup = centered_rect(60, popup_height, area);
+
+    let mut lines = vec![
+        Line::from(""),
+        Line::from(Span::styled(
+            "  Load Saved Pet  💾",
+            Style::default()
+                .fg(theme.title)
+                .add_modifier(Modifier::BOLD),
+        )),
+        Line::from(""),
+    ];
+
+    if app.load_options.is_empty() {
+        lines.push(Line::from(Span::styled(
+            "  No saved pets found.",
+            Style::default().fg(theme.message),
+        )));
+    } else {
+        lines.push(Line::from(Span::styled(
+            "  Select a pet to load:",
+            Style::default().fg(theme.message),
+        )));
+        lines.push(Line::from(""));
+
+        for (i, save) in app.load_options.iter().enumerate() {
+            let days = (chrono::Utc::now() - save.pet.created_at).num_days() + 1;
+            let label = format!("{} ({:?} - Day {})", save.pet.name, save.pet.species, days);
+            if i == app.selected_load {
+                lines.push(Line::from(Span::styled(
+                    format!("  > {}", label),
+                    Style::default()
+                        .fg(theme.primary)
+                        .add_modifier(Modifier::BOLD),
+                )));
+            } else {
+                lines.push(Line::from(Span::styled(
+                    format!("    {}", label),
+                    Style::default().fg(theme.message),
+                )));
+            }
+        }
+    }
+
+    lines.push(Line::from(""));
+    lines.push(Line::from(Span::styled(
+        "  [Up/Down] Select   [Enter] Confirm   [Del] Delete   [Esc] Back",
+        Style::default().fg(theme.muted),
+    )));
+
+    let para = Paragraph::new(Text::from(lines))
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Double)
+                .border_style(Style::default().fg(theme.border))
+                .title(Span::styled(
+                    " 💾 Load Pet ",
                     Style::default()
                         .fg(theme.accent)
                         .add_modifier(Modifier::BOLD),

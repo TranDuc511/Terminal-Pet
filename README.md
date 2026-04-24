@@ -38,9 +38,10 @@ Adopt a cat, keep it happy by feeding, petting, and playing with it, and watch y
 - 📉 **Real-time decay** — bond and happiness decrease over time, even offline
 - 🍖 **Interaction cooldowns** — each action has a realistic cooldown timer
 - 🎨 **5 color themes** — Red, Blue, Green, Pink, Yellow (RGB colors)
-- 💾 **Auto-save** — game state is saved every 60 seconds and on quit
+- 💾 **Auto-save & Multi-Pet** — game state is saved every 60 seconds, on quit, and when returning to the menu. Manage multiple pets and delete saves directly from the menu!
 - 🌙 **Offline catch-up** — the app calculates how long you were away and applies decay accordingly
-- 📺 **Full TUI** — beautiful terminal UI with gauges, panels, and a message log
+- 📅 **Streak tracker** — tracks the real-world days since your pet was adopted, displayed right in the title bar
+- 📺 **Full TUI** — beautiful terminal UI with perfectly centered ASCII art, gauges, panels, and a message log
 
 ---
 
@@ -144,8 +145,8 @@ Press `Esc` without typing to use the default name **"Whiskers"**.
 ### Understanding the UI
 
 ```
-┌──────────────────────────────────────────────────┐
-│  🐱 Terminal Pet — "Whiskers"        Theme: 🔵   │  ← Title bar
+┌────────────────────────────────────────────────────────┐
+│  🐱 Terminal Pet — "Whiskers" (Day 1)      Theme: 🔵   │  ← Title bar
 ├──────────────────────────────────────────────────┤
 │                                                  │
 │                    /\_/\                         │
@@ -232,13 +233,13 @@ The penalties are **capped** so your pet can never reach absolute zero from a si
 
 ## Save System
 
-Game state is automatically saved to a JSON file:
+Game state is automatically saved to a JSON file named after your pet (e.g., `save_Whiskers.json`):
 
 | Platform | Save Location |
 |----------|--------------|
-| Windows | `%APPDATA%\terminal-pet\save.json` |
-| macOS | `~/Library/Application Support/terminal-pet/save.json` |
-| Linux | `~/.local/share/terminal-pet/save.json` |
+| Windows | `%APPDATA%\terminal-pet\save_{name}.json` |
+| macOS | `~/Library/Application Support/terminal-pet/save_{name}.json` |
+| Linux | `~/.local/share/terminal-pet/save_{name}.json` |
 
 The save file is human-readable JSON:
 
@@ -262,9 +263,10 @@ The save file is human-readable JSON:
 **Auto-save triggers:**
 - Every 60 seconds while the app is running
 - When you press `Q` to quit
+- When you press `M` to return to the menu
 - On clean exit
 
-To **start fresh**, simply delete the save file.
+To **delete a pet**, highlight it in the "Load saved" menu and press the `Delete` or `Backspace` key. Alternatively, you can manually delete its corresponding save file from the directory above.
 
 ---
 
@@ -343,6 +345,18 @@ cargo check
 ---
 
 ## Changelog
+
+### Released (v0.1.3)
+- **Feature:** Added a real-time Day count (streak) tracker displayed in the title bar and Load Saved menu.
+- **Feature:** Added the ability to delete save files directly from the "Load Saved" menu using the `Delete` or `Backspace` key.
+- **Fix:** Smoothed out ASCII animations by dynamically adjusting animation speed based on the pet's state (e.g., sleeping is slower, eating is faster).
+- **Fix:** Fixed an issue where the ASCII art would appear jagged or misaligned by perfectly centering it visually within the terminal panel.
+
+### Released (v0.1.2)
+- **Feature:** Added support for adopting multiple pets! Save files are now named after the pet (e.g., `save_Whiskers.json`).
+- **Feature:** Added a "Load saved" option to the Pet Selection Menu.
+- **Feature:** The game now automatically auto-saves when you press `M` to return to the menu.
+- **Feature:** Automatically loads the most recently played pet on startup.
 
 ### Released (v0.1.1)
 - **Feature:** Added a Pet Selection Menu on first launch to choose between Cat, Dog (soon), and Turtle (soon).

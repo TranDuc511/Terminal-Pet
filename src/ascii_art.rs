@@ -165,6 +165,11 @@ pub fn get_frames(state: PetState) -> &'static [&'static str] {
 /// Pick the current frame given a rolling animation tick counter.
 pub fn current_frame(state: PetState, tick: u64) -> &'static str {
     let frames = get_frames(state);
-    let idx = (tick as usize) % frames.len();
+    let speed = match state {
+        PetState::Eating => 1,      // Fast (4 fps)
+        PetState::Playing | PetState::BeingPatted => 2, // Medium (2 fps)
+        PetState::Idle | PetState::Sleeping | PetState::Sad => 4, // Slow (1 fps)
+    };
+    let idx = ((tick / speed) as usize) % frames.len();
     frames[idx]
 }
