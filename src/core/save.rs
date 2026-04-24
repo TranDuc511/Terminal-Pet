@@ -12,8 +12,8 @@ use std::{
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::pet::Pet;
-use crate::theme::ThemeColor;
+use crate::core::pet::Pet;
+use crate::core::theme::ThemeColor;
 
 // ─── Save-file schema ─────────────────────────────────────────────────────
 

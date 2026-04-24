@@ -278,28 +278,32 @@ Terminal Pet/
 ├── Cargo.toml               # Project manifest: dependencies and metadata
 │
 └── src/
-    ├── main.rs              # Entry point: sets up the terminal, parses --color flag, runs the app
-    ├── app.rs               # Central app state and game loop: drives ticks, handles all key input
-    ├── event.rs             # Background thread: sends keyboard events and periodic ticks via channel
-    ├── pet.rs               # Pet logic: stats (bond/hunger/happiness), interactions, decay, mood
-    ├── ascii_art.rs         # ASCII art frames for the cat in each state (idle, eating, playing, etc.)
-    ├── theme.rs             # Five color themes (Red/Blue/Green/Pink/Yellow) with full RGB palettes
-    ├── ui.rs                # Ratatui rendering: title bar, pet panel, gauges, action bar, log, overlays
-    └── save.rs              # JSON persistence: save/load game state, offline decay calculation
+    ├── main.rs              # Entry point: terminal setup, arg parsing, mounts the app
+    ├── app/                 # Application state and event loop
+    │   ├── mod.rs           # Central app state and game loop
+    │   └── handlers.rs      # User input handling and business logic
+    ├── core/                # Core domain models and systems
+    │   ├── pet.rs           # Pet logic: stats, interactions, decay, mood
+    │   ├── event.rs         # Background thread for input and tick events
+    │   ├── theme.rs         # Color themes with RGB palettes
+    │   ├── save.rs          # JSON persistence and offline decay
+    │   └── ascii_art.rs     # ASCII art frames and animations
+    └── ui/                  # Ratatui rendering components
+        ├── mod.rs           # Main UI rendering pipeline
+        ├── home.rs          # Gameplay screen layout (gauges, pet, log)
+        ├── menus.rs         # Pet selection and save management menus
+        ├── help.rs          # Help and keyboard shortcut overlay
+        └── utils.rs         # Shared rendering utilities
 ```
 
-### What each file does
+### What each module does
 
-| File | Responsibility |
-|------|---------------|
+| Module | Responsibility |
+|--------|---------------|
 | `main.rs` | Terminal setup (raw mode, alternate screen), panic hook, CLI arg parsing, clean teardown |
-| `app.rs` | Owns all state (`Pet`, `Theme`, `Screen`, message log); runs the event → update → render loop |
-| `event.rs` | Spawns a thread that reads `crossterm` events and sends `Tick` + `Key` + `Resize` to the main loop |
-| `pet.rs` | Defines `Pet` struct; implements `feed()`, `pat()`, `play()`, `tick()`, cooldowns, and mood logic |
-| `ascii_art.rs` | Static multi-frame ASCII art constants; `current_frame(state, tick)` picks the right animation frame |
-| `theme.rs` | `ThemeColor` enum + `Theme` struct; each theme defines 12 RGB color values for every UI element |
-| `ui.rs` | All rendering code: uses ratatui `Paragraph`, `Gauge`, `Block`, `Layout`, and `Clear` widgets |
-| `save.rs` | Resolves the platform save path, serializes/deserializes `SaveFile` as JSON, calculates offline time |
+| `app/` | Owns all state (`Pet`, `Theme`, `Screen`, log); runs the main event → update → render loop |
+| `core/` | Defines core game mechanics, background event handling, themes, ASCII art, and saving/loading |
+| `ui/` | Modular UI components that take the application state and render it to the terminal screen |
 
 ---
 
@@ -337,6 +341,13 @@ cargo check
 **`cargo` command not found?**
 - Rust is not installed, or the installation directory is not in your `PATH`.
 - Install from **https://rustup.rs**, then open a fresh terminal window.
+
+**Windows linker errors (`link.exe` failed)?**
+- If you experience linking issues on Windows (especially when missing the C++ build tools), switch to the GNU toolchain:
+  ```sh
+  rustup toolchain install stable-x86_64-pc-windows-gnu
+  rustup default stable-x86_64-pc-windows-gnu
+  ```
 
 **My pet's bond is already very low on startup?**
 - This is the offline decay system working as intended! Your cat missed you 💔

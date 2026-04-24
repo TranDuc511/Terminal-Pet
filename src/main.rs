@@ -16,16 +16,12 @@ use crossterm::{
 use ratatui::{backend::CrosstermBackend, Terminal};
 
 mod app;
-mod ascii_art;
-mod event;
-mod pet;
-mod save;
-mod theme;
-mod ui;
+pub mod core;
+pub mod ui;
 
 use app::App;
-use event::EventHandler;
-use theme::ThemeColor;
+use core::event::EventHandler;
+use core::theme::ThemeColor;
 
 fn main() -> io::Result<()> {
     // ── Parse optional --color <theme> CLI arg ────────────────────────────

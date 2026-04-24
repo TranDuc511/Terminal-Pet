@@ -4,7 +4,7 @@
 // for zero-cost storage. The `get_frames` function returns the slice for a
 // given state; `current_frame` picks the frame based on an animation counter.
 
-use crate::pet::PetState;
+use crate::core::pet::PetState;
 
 // ─── Idle frames (tail flick) ───────────────────────────────────────────────
 
