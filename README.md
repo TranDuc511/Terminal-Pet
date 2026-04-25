@@ -357,7 +357,7 @@ cargo check
 
 ## Changelog
 
-### Released (v0.1.3)
+### Unreleased (v0.1.3)
 - **Feature:** Added a real-time Day count (streak) tracker displayed in the title bar and Load Saved menu.
 - **Feature:** Added the ability to delete save files directly from the "Load Saved" menu using the `Delete` or `Backspace` key.
 - **Fix:** Smoothed out ASCII animations by dynamically adjusting animation speed based on the pet's state (e.g., sleeping is slower, eating is faster).
