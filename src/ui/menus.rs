@@ -221,3 +221,95 @@ pub fn draw_load_saved_overlay(frame: &mut Frame, app: &App, theme: &Theme) {
     frame.render_widget(Clear, popup);
     frame.render_widget(para, popup);
 }
+
+// ─── Shop overlay ─────────────────────────────────────────────────────────
+
+pub fn draw_shop_overlay(frame: &mut Frame, app: &App, theme: &Theme) {
+    use crate::core::pet::ShopItem;
+
+    let area = frame.area();
+    frame.render_widget(Clear, area);
+
+    let popup = centered_rect(70, 20, area);
+
+    let days = app.pet.streak_days();
+    let unlocked = days >= 5;
+
+    let mut lines = vec![
+        Line::from(""),
+        Line::from(Span::styled(
+            "  🛒  Pet Shop  —  All items are FREE!",
+            Style::default()
+                .fg(theme.title)
+                .add_modifier(Modifier::BOLD),
+        )),
+        Line::from(""),
+        Line::from(Span::styled(
+            if unlocked {
+                format!("  ✅ Shop unlocked! (Day {} streak)", days)
+            } else {
+                format!("  🔒 Unlock at Day 5 streak — you are on Day {}", days)
+            },
+            Style::default()
+                .fg(if unlocked { theme.primary } else { theme.muted })
+                .add_modifier(Modifier::BOLD),
+        )),
+        Line::from(""),
+    ];
+
+    for (i, &item) in ShopItem::ALL.iter().enumerate() {
+        let label = format!(
+            "  {}  {:8}  {}",
+            item.icon(),
+            item.name(),
+            item.description()
+        );
+        if i == app.shop_selected {
+            lines.push(Line::from(Span::styled(
+                format!("> {}", label),
+                Style::default()
+                    .fg(theme.primary)
+                    .add_modifier(Modifier::BOLD),
+            )));
+        } else {
+            lines.push(Line::from(Span::styled(
+                format!("  {}", label),
+                Style::default().fg(theme.message),
+            )));
+        }
+    }
+
+    lines.push(Line::from(""));
+
+    if let Some(msg) = &app.shop_message {
+        lines.push(Line::from(Span::styled(
+            format!("  {}", msg),
+            Style::default()
+                .fg(theme.accent)
+                .add_modifier(Modifier::BOLD),
+        )));
+        lines.push(Line::from(""));
+    }
+
+    lines.push(Line::from(Span::styled(
+        "  [↑/↓] Navigate   [Enter] Feed   [S/Esc] Close",
+        Style::default().fg(theme.muted),
+    )));
+
+    let para = Paragraph::new(Text::from(lines))
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Double)
+                .border_style(Style::default().fg(theme.border))
+                .title(Span::styled(
+                    " 🛒 Shop ",
+                    Style::default()
+                        .fg(theme.accent)
+                        .add_modifier(Modifier::BOLD),
+                )),
+        );
+
+    frame.render_widget(Clear, popup);
+    frame.render_widget(para, popup);
+}

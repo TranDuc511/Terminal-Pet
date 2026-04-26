@@ -33,6 +33,9 @@ pub fn draw_help_overlay(frame: &mut Frame, theme: &Theme) {
             Span::styled("  [Y]", key), Span::styled("  Play with toy (15s cooldown)", dim),
         ]),
         Line::from(vec![
+            Span::styled("  [S]", key), Span::styled("  Open Shop (unlocks at Day 5)", dim),
+        ]),
+        Line::from(vec![
             Span::styled("  [T]", key), Span::styled("  Cycle color theme", dim),
         ]),
         Line::from(vec![
@@ -56,6 +59,20 @@ pub fn draw_help_overlay(frame: &mut Frame, theme: &Theme) {
         )),
         Line::from(Span::styled(
             "  Offline decay applies on next launch.",
+            dim,
+        )),
+        Line::from(""),
+        Line::from(Span::styled(
+            "  ── Shop ─────────────────────────────",
+            Style::default().fg(theme.accent),
+        )),
+        Line::from(""),
+        Line::from(Span::styled(
+            "  Shop unlocks after a 5-day streak.",
+            dim,
+        )),
+        Line::from(Span::styled(
+            "  Items: Coca, Popcorn, Snack, Grass.",
             dim,
         )),
         Line::from(""),

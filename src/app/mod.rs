@@ -5,7 +5,6 @@
 
 use std::time::{Duration, Instant};
 
-use crossterm::event::{KeyCode, KeyModifiers};
 
 use crate::core::{
     event::{AppEvent, EventHandler},
@@ -32,6 +31,8 @@ pub enum Screen {
     Help,
     /// Load previously saved pets.
     LoadSaved,
+    /// Shop overlay rendered over Home.
+    Shop,
 }
 
 // ─── App struct ───────────────────────────────────────────────────────────
@@ -67,6 +68,12 @@ pub struct App {
 
     /// Currently selected save index.
     pub selected_load: usize,
+
+    /// Currently highlighted item in the shop.
+    pub shop_selected: usize,
+
+    /// Feedback message shown inside the shop overlay.
+    pub shop_message: Option<String>,
 
     /// Set to `true` to break the game loop and quit.
     pub(crate) should_quit: bool,
@@ -112,6 +119,8 @@ impl App {
             selection_message: None,
             load_options:  Vec::new(),
             selected_load: 0,
+            shop_selected: 0,
+            shop_message:  None,
             should_quit:   false,
             last_autosave: Instant::now(),
         };

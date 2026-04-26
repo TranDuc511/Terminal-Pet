@@ -6,6 +6,53 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
+// ─── Shop Items ───────────────────────────────────────────────────────────
+
+/// Items available in the Shop. All are free; require a 5-day streak to use.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ShopItem {
+    Coca,
+    Popcorn,
+    Snack,
+    Grass,
+}
+
+impl ShopItem {
+    pub const ALL: [ShopItem; 4] = [
+        ShopItem::Coca,
+        ShopItem::Popcorn,
+        ShopItem::Snack,
+        ShopItem::Grass,
+    ];
+
+    pub fn name(self) -> &'static str {
+        match self {
+            ShopItem::Coca    => "Coca",
+            ShopItem::Popcorn => "Popcorn",
+            ShopItem::Snack   => "Snack",
+            ShopItem::Grass   => "Grass",
+        }
+    }
+
+    pub fn icon(self) -> &'static str {
+        match self {
+            ShopItem::Coca    => "🥤",
+            ShopItem::Popcorn => "🍿",
+            ShopItem::Snack   => "🍪",
+            ShopItem::Grass   => "🌿",
+        }
+    }
+
+    pub fn description(self) -> &'static str {
+        match self {
+            ShopItem::Coca    => "Refreshing cola  ·  Hunger -20, Happiness +10",
+            ShopItem::Popcorn => "Movie-night corn ·  Hunger -25, Happiness +15",
+            ShopItem::Snack   => "Crunchy treat    ·  Hunger -15, Bond +5",
+            ShopItem::Grass   => "Healthy greens   ·  Hunger -20, Bond +8, Joy +5",
+        }
+    }
+}
+
 // ─── Enums ────────────────────────────────────────────────────────────────
 
 /// Pet species.
@@ -321,5 +368,72 @@ impl Pet {
             else if self.bond >= 20.0 { "❤️" }
             else { "🖤" };
         format!("{} {:.0}%", hearts, self.bond)
+    }
+
+    /// How many consecutive days this pet has been alive (1-indexed).
+    pub fn streak_days(&self) -> i64 {
+        Utc::now().signed_duration_since(self.created_at).num_days() + 1
+    }
+
+    /// Feed a shop item to the pet.
+    /// Requires a 5-day streak; also shares the regular feed cooldown.
+    pub fn feed_shop_item(&mut self, item: ShopItem) -> InteractionResult {
+        let days = self.streak_days();
+        if days < 5 {
+            let remaining = 5 - days;
+            return InteractionResult {
+                success: false,
+                message: format!(
+                    "🔒 Shop treats unlock at day 5! ({} day{} to go)",
+                    remaining,
+                    if remaining == 1 { "" } else { "s" }
+                ),
+            };
+        }
+
+        if !self.cooldowns.feed_ready() {
+            let rem = self.cooldowns.feed_remaining();
+            return InteractionResult {
+                success: false,
+                message: format!(
+                    "⏳ {} isn't hungry yet! ({:.0}s cooldown)",
+                    self.name, rem
+                ),
+            };
+        }
+
+        // Apply item-specific effects
+        match item {
+            ShopItem::Coca => {
+                self.hunger    = (self.hunger - 20.0).max(0.0);
+                self.happiness = (self.happiness + 10.0).min(100.0);
+            }
+            ShopItem::Popcorn => {
+                self.hunger    = (self.hunger - 25.0).max(0.0);
+                self.happiness = (self.happiness + 15.0).min(100.0);
+            }
+            ShopItem::Snack => {
+                self.hunger    = (self.hunger - 15.0).max(0.0);
+                self.bond      = (self.bond + 5.0).min(100.0);
+            }
+            ShopItem::Grass => {
+                self.hunger    = (self.hunger - 20.0).max(0.0);
+                self.bond      = (self.bond + 8.0).min(100.0);
+                self.happiness = (self.happiness + 5.0).min(100.0);
+            }
+        }
+
+        self.cooldowns.last_feed  = Some(Utc::now());
+        self.last_interaction     = Utc::now();
+        self.state                = PetState::Eating;
+        self.state_ticks_remaining = 8;
+
+        InteractionResult {
+            success: true,
+            message: format!(
+                "{} You gave {} a {}! {}",
+                item.icon(), self.name, item.name(), item.description()
+            ),
+        }
     }
 }

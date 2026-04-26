@@ -19,5 +19,9 @@ pub fn draw(frame: &mut Frame, app: &App) {
             help::draw_help_overlay(frame, &theme);
         }
         Screen::LoadSaved => menus::draw_load_saved_overlay(frame, app, &theme),
+        Screen::Shop => {
+            home::draw_home(frame, app, &theme);
+            menus::draw_shop_overlay(frame, app, &theme);
+        }
     }
 }

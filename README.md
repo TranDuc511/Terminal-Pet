@@ -2,7 +2,7 @@
 
 A virtual pet caring game that runs entirely in your terminal — built with Rust.
 
-Adopt a cat, keep it happy by feeding, petting, and playing with it, and watch your **Bond** grow over time. Neglect your cat and the bond will slowly fade. Your pet's state is automatically saved, and bond decays even while the app is closed — so check in regularly!
+Adopt a cat, keep it happy by feeding, petting, and playing with it, and watch your **Bond** grow over time. Neglect your cat and the bond will slowly fade. Your pet's state is automatically saved, and bond decays even while the app is closed — so check in regularly! After **5 days** of dedication, the **Shop** unlocks — treat your pet to special snacks like Coca, Popcorn, Snack, and Grass!
 
 ```
       /\_/\
@@ -23,6 +23,7 @@ Adopt a cat, keep it happy by feeding, petting, and playing with it, and watch y
 - [Installation](#installation)
 - [Running the App](#running-the-app)
 - [How to Play](#how-to-play)
+- [Shop](#shop)
 - [Color Themes](#color-themes)
 - [Bond & Decay System](#bond--decay-system)
 - [Save System](#save-system)
@@ -37,6 +38,7 @@ Adopt a cat, keep it happy by feeding, petting, and playing with it, and watch y
 - ❤️ **Bond system** — build a bond through feeding, patting, and playing
 - 📉 **Real-time decay** — bond and happiness decrease over time, even offline
 - 🍖 **Interaction cooldowns** — each action has a realistic cooldown timer
+- 🛒 **Shop with streak rewards** — unlocks after 5 days; feed special treats: Coca 🥤, Popcorn 🍿, Snack 🍪, Grass 🌿 (all free!)
 - 🎨 **5 color themes** — Red, Blue, Green, Pink, Yellow (RGB colors)
 - 💾 **Auto-save & Multi-Pet** — game state is saved every 60 seconds, on quit, and when returning to the menu. Manage multiple pets and delete saves directly from the menu!
 - 🌙 **Offline catch-up** — the app calculates how long you were away and applies decay accordingly
@@ -137,6 +139,7 @@ Press `Esc` without typing to use the default name **"Whiskers"**.
 | `F` | **Feed** your pet 🍖 | 10 seconds |
 | `P` | **Head-pat** your pet 🤚 | 5 seconds |
 | `Y` | **Play** with a toy 🧶 | 15 seconds |
+| `S` | **Open Shop** 🛒 (unlocks at Day 5) | — |
 | `T` | **Cycle** to the next color theme 🎨 | — |
 | `M` | **Menu** exit to selection (New pet) 🐾| — |
 | `H` | **Toggle** the Help overlay | — |
@@ -160,7 +163,7 @@ Press `Esc` without typing to use the default name **"Whiskers"**.
 ├──────────────┬──────────────┬────────────────────┤
 │ ❤️  Bond  75% │ 🍖 Fullness 60%│ ✨ Joy  80%       │  ← Stat gauges
 ├──────────────┴──────────────┴────────────────────┤
-│ [F] Feed │ [P] Pat │ [Y] Play │ [T] Theme │ [M] Menu │ [H] Help │ [Q] Quit │  ← Action bar
+│ [F] Feed │ [P] Pat │ [Y] Play │ [S] Shop │ [T] Theme │ [M] Menu │ [H] Help │ [Q] Quit │  ← Action bar
 ├──────────────────────────────────────────────────┤
 │  ▸ You gently patted Whiskers! Bond +5           │
 │  ▸ Whiskers purrs contentedly~                   │  ← Message log
@@ -191,7 +194,32 @@ Your cat's current mood is shown at the top of the pet panel:
 
 ---
 
-## Color Themes
+## Shop
+
+The **Shop** is a special feature that unlocks once your pet has been with you for **5 days** in a row. It rewards dedicated players with free treats that have unique stat boosts.
+
+### How to Access
+
+1. Press `S` on the main game screen.
+2. The shop opens as an overlay showing all available items.
+3. Use `↑` / `↓` to browse, and `Enter` to feed the selected item to your pet.
+4. Press `S` or `Esc` to close.
+
+> **Streak gate:** If your pet is younger than 5 days, the shop will show a 🔒 lock and count down the remaining days.
+
+### Shop Items
+
+All items are **completely free** — no currency needed!
+
+| Item | Icon | Effect |
+|------|------|--------|
+| Coca | 🥤 | Hunger −20, Joy +10 |
+| Popcorn | 🍿 | Hunger −25, Joy +15 |
+| Snack | 🍪 | Hunger −15, Bond +5 |
+| Grass | 🌿 | Hunger −20, Bond +8, Joy +5 |
+
+> **Tip:** Shop treats share the same 10-second feed cooldown as the regular `F` key.
+
 
 Switch themes at any time with the `T` key, or set one at launch with `--color <name>`.
 
@@ -291,7 +319,7 @@ Terminal Pet/
     └── ui/                  # Ratatui rendering components
         ├── mod.rs           # Main UI rendering pipeline
         ├── home.rs          # Gameplay screen layout (gauges, pet, log)
-        ├── menus.rs         # Pet selection and save management menus
+        ├── menus.rs         # Pet selection, save management, and shop overlay
         ├── help.rs          # Help and keyboard shortcut overlay
         └── utils.rs         # Shared rendering utilities
 ```
@@ -357,7 +385,14 @@ cargo check
 
 ## Changelog
 
-### Unreleased (v0.1.3)
+### Released (v0.1.4)
+- **Feature:** Added a **Shop** system that unlocks after a 5-day streak.
+- **Feature:** Four shop items available — Coca 🥤, Popcorn 🍿, Snack 🍪, and Grass 🌿 — each with unique stat boosts (all free!).
+- **Feature:** Press `[S]` on the main screen to open the shop overlay. Navigate with arrow keys, feed with `Enter`.
+- **Feature:** Shop items share the regular feed cooldown and display a streak lock message if the pet is under 5 days old.
+- **Update:** Added `[S] Shop` to the action bar and Help overlay.
+
+### Released (v0.1.3)
 - **Feature:** Added a real-time Day count (streak) tracker displayed in the title bar and Load Saved menu.
 - **Feature:** Added the ability to delete save files directly from the "Load Saved" menu using the `Delete` or `Backspace` key.
 - **Fix:** Smoothed out ASCII animations by dynamically adjusting animation speed based on the pet's state (e.g., sleeping is slower, eating is faster).

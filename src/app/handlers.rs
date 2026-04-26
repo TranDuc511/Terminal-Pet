@@ -1,7 +1,7 @@
 use crossterm::event::{KeyCode, KeyModifiers};
 
 use crate::app::{App, Screen};
-use crate::core::pet::{Pet, Species};
+use crate::core::pet::{Pet, ShopItem, Species};
 use crate::core::save;
 
 impl App {
@@ -12,6 +12,7 @@ impl App {
             Screen::Home   => self.handle_home_key(code, modifiers),
             Screen::Help   => self.handle_help_key(code),
             Screen::LoadSaved => self.handle_load_saved_key(code),
+            Screen::Shop  => self.handle_shop_key(code),
         }
     }
 
@@ -139,6 +140,48 @@ impl App {
                 self.screen = Screen::PetSelection;
                 self.selected_species = 0;
                 self.name_input.clear();
+            }
+            KeyCode::Char('s') | KeyCode::Char('S') => {
+                self.screen = Screen::Shop;
+                self.shop_selected = 0;
+                self.shop_message = None;
+            }
+            _ => {}
+        }
+    }
+
+    fn handle_shop_key(&mut self, code: KeyCode) {
+        const ITEM_COUNT: usize = 4;
+        match code {
+            KeyCode::Up => {
+                if self.shop_selected > 0 {
+                    self.shop_selected -= 1;
+                } else {
+                    self.shop_selected = ITEM_COUNT - 1;
+                }
+                self.shop_message = None;
+            }
+            KeyCode::Down => {
+                if self.shop_selected < ITEM_COUNT - 1 {
+                    self.shop_selected += 1;
+                } else {
+                    self.shop_selected = 0;
+                }
+                self.shop_message = None;
+            }
+            KeyCode::Enter => {
+                let item = ShopItem::ALL[self.shop_selected];
+                let result = self.pet.feed_shop_item(item);
+                if result.success {
+                    self.push_message(result.message.clone());
+                }
+                self.shop_message = Some(result.message);
+            }
+            KeyCode::Char('s') | KeyCode::Char('S')
+            | KeyCode::Char('q') | KeyCode::Char('Q')
+            | KeyCode::Esc => {
+                self.screen = Screen::Home;
+                self.shop_message = None;
             }
             _ => {}
         }
