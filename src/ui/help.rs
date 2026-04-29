@@ -39,6 +39,9 @@ pub fn draw_help_overlay(frame: &mut Frame, theme: &Theme) {
             Span::styled("  [T]", key), Span::styled("  Cycle color theme", dim),
         ]),
         Line::from(vec![
+            Span::styled("  [U]", key), Span::styled("  Toggle Music (vibes & slows decay)", dim),
+        ]),
+        Line::from(vec![
             Span::styled("  [M]", key), Span::styled("  Exit to menu (New Pet)", dim),
         ]),
         Line::from(vec![

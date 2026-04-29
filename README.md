@@ -39,6 +39,7 @@ Adopt a cat, keep it happy by feeding, petting, and playing with it, and watch y
 - 📉 **Real-time decay** — bond and happiness decrease over time, even offline
 - 🍖 **Interaction cooldowns** — each action has a realistic cooldown timer
 - 🛒 **Shop with streak rewards** — unlocks after 5 days; feed special treats: Coca 🥤, Popcorn 🍿, Snack 🍪, Grass 🌿 (all free!)
+- 🎵 **Music Mode** — toggle music to spawn a wave visualizer, make your pet vibe, and halve bond decay!
 - 🎨 **5 color themes** — Red, Blue, Green, Pink, Yellow (RGB colors)
 - 💾 **Auto-save & Multi-Pet** — game state is saved every 60 seconds, on quit, and when returning to the menu. Manage multiple pets and delete saves directly from the menu!
 - 🌙 **Offline catch-up** — the app calculates how long you were away and applies decay accordingly
@@ -139,6 +140,7 @@ Press `Esc` without typing to use the default name **"Whiskers"**.
 | `F` | **Feed** your pet 🍖 | 10 seconds |
 | `P` | **Head-pat** your pet 🤚 | 5 seconds |
 | `Y` | **Play** with a toy 🧶 | 15 seconds |
+| `U` | **Toggle Music** ♪ | — |
 | `S` | **Open Shop** 🛒 (unlocks at Day 5) | — |
 | `T` | **Cycle** to the next color theme 🎨 | — |
 | `M` | **Menu** exit to selection (New pet) 🐾| — |
@@ -163,7 +165,7 @@ Press `Esc` without typing to use the default name **"Whiskers"**.
 ├──────────────┬──────────────┬────────────────────┤
 │ ❤️  Bond  75% │ 🍖 Fullness 60%│ ✨ Joy  80%       │  ← Stat gauges
 ├──────────────┴──────────────┴────────────────────┤
-│ [F] Feed │ [P] Pat │ [Y] Play │ [S] Shop │ [T] Theme │ [M] Menu │ [H] Help │ [Q] Quit │  ← Action bar
+│ [F] Feed │ [P] Pat │ [Y] Play │ [U] Music │ [S] Shop │ [T] Theme │ [M] Menu │ [H] Help │ [Q] Quit │  ← Action bar
 ├──────────────────────────────────────────────────┤
 │  ▸ You gently patted Whiskers! Bond +5           │
 │  ▸ Whiskers purrs contentedly~                   │  ← Message log
@@ -384,6 +386,11 @@ cargo check
 ---
 
 ## Changelog
+
+### Released (v0.1.5)
+- **Feature:** Added a **Music Mode** toggle (`[U]`). When active, an animated wave visualizer appears on both sides of the pet.
+- **Feature:** While music is playing, the pet switches to a new 2-frame "Vibing" animation.
+- **Buff:** Bond decay is halved while music is playing, rewarding the player for keeping the vibes going.
 
 ### Released (v0.1.4)
 - **Feature:** Added a **Shop** system that unlocks after a 5-day streak.

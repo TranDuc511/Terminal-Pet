@@ -146,6 +146,20 @@ impl App {
                 self.shop_selected = 0;
                 self.shop_message = None;
             }
+            KeyCode::Char('u') | KeyCode::Char('U') => {
+                self.music_playing = !self.music_playing;
+                if self.music_playing {
+                    self.push_message(format!(
+                        "🎵 Music on! {} starts vibing~ (bond decay ↓)",
+                        self.pet.name
+                    ));
+                } else {
+                    self.push_message(format!(
+                        "🔇 Music off. {} settles down.",
+                        self.pet.name
+                    ));
+                }
+            }
             _ => {}
         }
     }

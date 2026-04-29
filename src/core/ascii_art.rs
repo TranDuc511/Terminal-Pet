@@ -6,6 +6,34 @@
 
 use crate::core::pet::PetState;
 
+// ─── Vibing frames (music mode) ─────────────────────────────────────────────
+// Only 2 frames that loop for a simple bobbing effect.
+
+const VIBE_1: &str = r#"
+      /\_/\
+     ( ^.^ )
+      > v <
+     /     \
+    /  | |  \
+   /   | |   \
+  (___(|_|_)__)  ♪
+"#;
+
+const VIBE_2: &str = r#"
+      /\_/\
+     ( ^w^ )
+      > v <
+     /     \
+    /       \
+   /   | |   \
+  (___(|_|_)__)    ♪♫
+"#;
+
+/// Pick the current vibe frame (2-frame loop, fast).
+pub fn current_vibe_frame(tick: u64) -> &'static str {
+    if (tick / 2) % 2 == 0 { VIBE_1 } else { VIBE_2 }
+}
+
 // ─── Idle frames (tail flick) ───────────────────────────────────────────────
 
 const IDLE_1: &str = r#"

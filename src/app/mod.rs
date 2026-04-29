@@ -75,6 +75,9 @@ pub struct App {
     /// Feedback message shown inside the shop overlay.
     pub shop_message: Option<String>,
 
+    /// Whether the user is currently playing music (toggles wave visualiser + reduces bond decay).
+    pub music_playing: bool,
+
     /// Set to `true` to break the game loop and quit.
     pub(crate) should_quit: bool,
 
@@ -121,6 +124,7 @@ impl App {
             selected_load: 0,
             shop_selected: 0,
             shop_message:  None,
+            music_playing: false,
             should_quit:   false,
             last_autosave: Instant::now(),
         };
@@ -188,7 +192,7 @@ impl App {
 
         // Only run pet logic on the main screen
         if self.screen == Screen::Home || self.screen == Screen::Help {
-            if let Some(msg) = self.pet.tick() {
+            if let Some(msg) = self.pet.tick(self.music_playing) {
                 self.push_message(msg);
             }
         }
@@ -197,6 +201,14 @@ impl App {
         if self.anim_tick % 240 == 0 && self.pet.bond < 30.0 && self.screen == Screen::Home {
             self.push_message(format!(
                 "💔 {}'s bond is fading... spend more time together!",
+                self.pet.name
+            ));
+        }
+
+        // Music active reminder every ~120 ticks (30s)
+        if self.music_playing && self.anim_tick % 120 == 60 && self.screen == Screen::Home {
+            self.push_message(format!(
+                "🎵 {} vibes to the music~ bond decay is slower!",
                 self.pet.name
             ));
         }

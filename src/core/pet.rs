@@ -218,13 +218,16 @@ impl Pet {
     // ─── Tick update ──────────────────────────────────────────────────────
 
     /// Called every game tick (250 ms). Updates decay and state transitions.
+    /// `music_playing` halves bond decay when the user is playing music.
     /// Returns an optional log message if something noteworthy happened.
-    pub fn tick(&mut self) -> Option<String> {
+    pub fn tick(&mut self, music_playing: bool) -> Option<String> {
         let mut msg = None;
 
         // Decay bond slightly each tick (4 ticks/s → each tick = 15s equivalent game minute)
-        // Rate: -0.5 per real minute → -0.5/240 per tick
-        self.bond     = (self.bond - 0.00208).max(0.0);
+        // Base rate: -0.5 per real minute → -0.5/240 per tick
+        // Music halves decay to reward the player for keeping music on.
+        let bond_decay = if music_playing { 0.00104 } else { 0.00208 };
+        self.bond     = (self.bond - bond_decay).max(0.0);
         // Hunger increases naturally over time (gets hungrier)
         self.hunger   = (self.hunger + 0.00416).min(100.0);
         // Happiness decays slowly if not high-bond
